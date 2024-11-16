@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Chat with PDF
 
 This is a Streamlit application that allows users to upload PDF documents and chat with them. The application extracts text from the uploaded PDFs, splits the text into manageable chunks, and utilizes a conversational AI model to answer user queries based on the content of the PDFs.
@@ -26,3 +27,6 @@ To run this application locally, follow these steps:
    ```bash
    git clone <repository-url>
    cd <repository-directory>
+=======
+# Content_Engine
+>>>>>>> origin/main
