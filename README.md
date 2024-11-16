@@ -30,3 +30,8 @@ To run this application locally, follow these steps:
 =======
 # Content_Engine
 >>>>>>> origin/main
+
+# Screenshots
+
+![alt text](<Screenshot 2024-11-16 202704.png>) 
+![alt text](<Screenshot 2024-11-16 202626.png>)
