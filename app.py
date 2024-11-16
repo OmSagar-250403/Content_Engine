@@ -1,11 +1,12 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
+import numpy as np
+from langchain_community.vectorstores import FAISS
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 # Function to extract text from PDF
 def get_pdf_text(pdf_docs):
@@ -25,18 +26,29 @@ def get_text_chunks(raw_text):
     text_chunks = text_splitter.split_text(raw_text)
     return text_chunks
 
+
 # Function to create embeddings and vector store
 def get_vectorstore(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
-    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
-    return vectorstore
+    try:
+        # Create embeddings using GoogleGenerativeAIEmbeddings
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+
+        # The FAISS vector store automatically handles the embedding creation
+        vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+        vectorstore.save_local("faiss_index")  # Save the FAISS index locally
+        st.success("FAISS index created and saved successfully!")
+        # Return the vectorstore
+        return vectorstore
+
+    except Exception as e:
+        st.error(f"Error creating vectorstore: {e}")
+        return None
 
 # Function to handle user input
 def handle_userinput(question):
-    # Retrieve the response from the conversation chain
     response = st.session_state.conversation({"question": question})
-    st.session_state.chat_history.append(response['chat_history'])  # Store the chat history
-    st.write(response['answer'])  # Display the answer
+    st.session_state.chat_history.append(response['chat_history'])
+    st.write(response['answer'])
 
 # Function to create conversation chain
 def get_conversation_chain(vectorstore):
@@ -54,7 +66,6 @@ def main():
     st.set_page_config(page_title="Chat with PDF", page_icon=":books:")
     st.header("Chat with Your PDF Files :books:")
     
-    # User input for PDF upload
     pdf_docs = st.file_uploader("Upload your PDFs here", accept_multiple_files=True)
     
     if st.button("Process"):
@@ -62,13 +73,15 @@ def main():
             raw_text = get_pdf_text(pdf_docs)
             text_chunks = get_text_chunks(raw_text)
             vectorstore = get_vectorstore(text_chunks)
-            st.session_state.conversation = get_conversation_chain(vectorstore)
-            st.session_state.chat_history = []  # Initialize chat history
-            st.success("PDF processed successfully!")
+            if vectorstore:
+                st.session_state.conversation = get_conversation_chain(vectorstore)
+                st.session_state.chat_history = []  # Initialize chat history
+                st.success("PDF processed successfully!")
+            else:
+                st.error("There was an error creating the vectorstore.")
         else:
             st.error("Please upload at least one PDF file.")
     
-    # User question input
     user_question = st.text_input("Ask a question about your documents:")
     if user_question:
         handle_userinput(user_question)

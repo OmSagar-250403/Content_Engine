@@ -1,0 +1,35 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.class
+*.jar
+*.war
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*~
+
+# IDE-specific files
+.idea
+.vscode
+.project
+
+# Virtual environments
+myenv
+virtualenv
+
+# Local configuration
+config.local.py
+settings.local.py
+
+# Environment variables
+.env
